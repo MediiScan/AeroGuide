@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="login-container">
+    <div class="logo">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="AeroGuide Logo">
+        <h1>AeroGuide</h1>
+        <p>System wspomagania kontroli lotów</p>
+    </div>
+
+    <div class="login-form-container">
+        <h2>Logowanie do systemu</h2>
+
+        {% if error %}
+            <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        <form id="login-form" method="post">
+            <div class="form-group">
+                <label for="username">Nazwa użytkownika:</label>
+                <input type="text" id="username" name="username" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Hasło:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" id="login-button">Zaloguj się</button>
+            </div>
+        </form>
+
+        <div class="login-help">
+            <p>Aby uzyskać dostęp, skontaktuj się z administratorem systemu.</p>
+            <p class="demo-credentials">Dane testowe: controller / password123</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

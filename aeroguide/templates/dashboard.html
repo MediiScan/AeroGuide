@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+    <header>
+        <div class="logo-small">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="AeroGuide Logo">
+            <h1>AeroGuide</h1>
+        </div>
+        <div class="user-info">
+            <span>Zalogowano jako: <strong>{{ username }}</strong></span>
+            <a href="{{ url_for('logout') }}" class="logout-button">Wyloguj</a>
+        </div>
+        <div class="emergency-container">
+            <button id="emergency-alert-button" class="emergency-button">EMERGENCY ALERT</button>
+        </div>
+    </header>
+
+    <div id="emergency-dialog" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>EMERGENCY ALERT</h2>
+            <p>Potwierdź aktywację alarmu awaryjnego.</p>
+            <textarea id="emergency-message" placeholder="Opcjonalny opis sytuacji awaryjnej"></textarea>
+            <div class="modal-buttons">
+                <button class="confirm-emergency">Aktywuj</button>
+                <button class="close-dialog">Anuluj</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="assign-runway-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Przydziel pas startowy</h2>
+            <p>Wybierz pas startowy dla lotu: <span id="flight-to-assign"></span></p>
+            <div class="form-group">
+                <label for="runway-select">Pas startowy:</label>
+                <select id="runway-select">
+                    <!-- Opcje będą dodane dynamicznie -->
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button id="confirm-runway-assignment">Przydziel</button>
+                <button class="close-dialog">Anuluj</button>
+            </div>
+        </div>
+    </div>
+
+    <main id="dashboard">
+        <nav class="tabs">
+            <ul>
+                <li><a id="dashboard-tab" class="active" href="#dashboard-content">Panel główny</a></li>
+                <li><a id="flights-tab" href="#flights-content">Loty</a></li>
+                <li><a id="new-flight-tab" href="#new-flight-content">Nowy lot</a></li>
+                <li><a id="runways-tab" href="#runways-content">Pasy startowe</a></li>
+                <li><a id="alerts-tab" href="#alerts-content">Alerty</a></li>
+            </ul>
+        </nav>
+
+        <div class="tab-content">
+            <div id="dashboard-content" class="active">
+                <h2>Panel główny</h2>
+                
+                <div class="dashboard-overview">
+                    <div class="info-box" id="active-flights-box">
+                        <h3>Aktywne loty</h3>
+                        <div class="big-number" id="active-flights-count">0</div>
+                    </div>
+                    
+                    <div class="info-box" id="available-runways-box">
+                        <h3>Dostępne pasy</h3>
+                        <div class="big-number" id="available-runways-count">0</div>
+                    </div>
+                    
+                    <div class="info-box" id="active-alerts-box">
+                        <h3>Aktywne alerty</h3>
+                        <div class="big-number" id="active-alerts-count">0</div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-sections">
+                    <div class="flights-preview">
+                        <h3>Nadchodzące loty</h3>
+                        <div id="upcoming-flights-list">
+                            <p>Ładowanie danych...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="alerts-preview">
+                        <h3>Ostatnie alerty</h3>
+                        <div id="recent-alerts-list">
+                            <p>Ładowanie danych...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="flights-content">
+                <h2>Zarządzanie lotami</h2>
+                <div class="section-header">
+                    <div>Ostatnia aktualizacja: <span id="flights-update-timestamp">--:--:--</span></div>
+                </div>
+                
+                <div id="active-flights-list" class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nr lotu</th>
+                                <th>Linia lotnicza</th>
+                                <th>Typ samolotu</th>
+                                <th>Z</th>
+                                <th>Do</th>
+                                <th>Odlot</th>
+                                <th>Przylot</th>
+                                <th>Status</th>
+                                <th>Pas</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="10">Ładowanie danych...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="new-flight-content">
+                <h2>Rejestracja nowego lotu</h2>
+                
+                <div id="new-flight-form" class="form-container">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="flight-number">Numer lotu:</label>
+                            <input type="text" id="flight-number" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="airline">Linia lotnicza:</label>
+                            <input type="text" id="airline" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="aircraft-type">Typ samolotu:</label>
+                            <input type="text" id="aircraft-type" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="departure-time">Czas odlotu:</label>
+                            <input type="datetime-local" id="departure-time" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="arrival-time">Czas przylotu:</label>
+                            <input type="datetime-local" id="arrival-time" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="origin">Lotnisko wylotu:</label>
+                            <input type="text" id="origin" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="destination">Lotnisko docelowe:</label>
+                            <input type="text" id="destination" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <button id="submit-flight" class="primary-button">Zapisz lot</button>
+                        <button id="reset-flight-form" class="secondary-button">Wyczyść formularz</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="runways-content">
+                <h2>Zarządzanie pasami startowymi</h2>
+                
+                <div id="runways-management" class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nazwa</th>
+                                <th>Długość (m)</th>
+                                <th>Szerokość (m)</th>
+                                <th>Status</th>
+                                <th>Aktualnie używany przez</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="5">Ładowanie danych...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="alerts-content">
+                <h2>Zarządzanie alertami</h2>
+                <div class="section-header">
+                    <button id="new-alert-button" class="primary-button">Nowy alert</button>
+                </div>
+                
+                <div id="new-alert-form" class="form-container" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="alert-title">Tytuł alertu:</label>
+                            <input type="text" id="alert-title" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="alert-severity">Poziom zagrożenia:</label>
+                            <select id="alert-severity" required>
+                                <option value="low">Niski</option>
+                                <option value="medium">Średni</option>
+                                <option value="high">Wysoki</option>
+                                <option value="critical">Krytyczny</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="alert-description">Opis alertu:</label>
+                            <textarea id="alert-description" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="related-flight">Powiązany lot (opcjonalnie):</label>
+                            <select id="related-flight">
+                                <option value="">-- Brak --</option>
+                                <!-- Opcje będą dodane dynamicznie -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <button id="send-alert-button" class="primary-button">Wyślij alert</button>
+                        <button id="cancel-alert-button" class="secondary-button">Anuluj</button>
+                    </div>
+                </div>
+                
+                <div id="alerts-management" class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Czas</th>
+                                <th>Tytuł</th>
+                                <th>Poziom</th>
+                                <th>Powiązany lot</th>
+                                <th>Status</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="6">Ładowanie danych...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/flights.js') }}"></script>
+<script src="{{ url_for('static', filename='js/runways.js') }}"></script>
+<script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+{% endblock %}
