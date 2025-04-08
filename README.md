@@ -21,8 +21,8 @@ AeroGuide to prosty system wspomagania zarządzania ruchem lotniczym, dedykowany
 1. Sklonuj repozytorium:
 
 ```bash
-git clone https://github.com/[username]/aeroguide.git
-cd aeroguide
+git clone https://github.com/TestUJsmialo/AeroGuide.git
+cd AeroGuide
 ```
 
 2. Utwórz wirtualne środowisko i aktywuj je:
